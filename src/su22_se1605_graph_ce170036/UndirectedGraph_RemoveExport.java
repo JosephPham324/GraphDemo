@@ -6,22 +6,31 @@
 package su22_se1605_graph_ce170036;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
  *
  * @author Pham Nhat Quang CE170036
  */
-public class UndirectedGraph_DrawSaveOpenExport extends javax.swing.JFrame {
+public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
     private GPaper p = null;
     JFileChooser fileChooser;
     SimpleDateFormat sdfDate = new SimpleDateFormat("yyyyMMdd_HHmmss");
     /**
      * Creates new form UndirectedGraph_DrawSaveOpenExport
      */
-    public UndirectedGraph_DrawSaveOpenExport() {
+    public UndirectedGraph_RemoveExport() {
         initComponents();
          try{
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/Images/graph-icon.png")));
@@ -69,7 +78,7 @@ public class UndirectedGraph_DrawSaveOpenExport extends javax.swing.JFrame {
         fExit = new javax.swing.JMenuItem();
         menuGraph = new javax.swing.JMenu();
         gClear = new javax.swing.JMenuItem();
-        jMenuItem1 = new javax.swing.JMenuItem();
+        export = new javax.swing.JMenuItem();
         menuAlgorithm = new javax.swing.JMenu();
         aShortestPath = new javax.swing.JMenuItem();
         aSpanningTree = new javax.swing.JMenuItem();
@@ -200,11 +209,16 @@ public class UndirectedGraph_DrawSaveOpenExport extends javax.swing.JFrame {
         gClear.setText("Clear");
         menuGraph.add(gClear);
 
-        jMenuItem1.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
-        jMenuItem1.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Images/export.png"))); // NOI18N
-        jMenuItem1.setMnemonic('E');
-        jMenuItem1.setText("Export PNG");
-        menuGraph.add(jMenuItem1);
+        export.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
+        export.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Images/export.png"))); // NOI18N
+        export.setMnemonic('E');
+        export.setText("Export PNG");
+        export.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                exportActionPerformed(evt);
+            }
+        });
+        menuGraph.add(export);
 
         jMenuBar2.add(menuGraph);
 
@@ -283,6 +297,43 @@ public class UndirectedGraph_DrawSaveOpenExport extends javax.swing.JFrame {
     private void fExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fExitActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_fExitActionPerformed
+    public File getSaveFile(FileNameExtensionFilter filter, String fName){
+        fileChooser.setFileFilter(filter);
+        fileChooser.setSelectedFile(new File(fName));
+        
+        if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION){
+            if (fileChooser.getSelectedFile().exists()){
+                int response = JOptionPane.showConfirmDialog(null, "Do you want to replace the existing file?", "Confirm",
+                        JOptionPane.YES_NO_OPTION,JOptionPane.QUESTION_MESSAGE);
+                if (response!=JOptionPane.YES_OPTION){
+                    return null;
+                }
+            }
+            return fileChooser.getSelectedFile();
+        }
+        return null;
+    }
+    
+    private void exportActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_exportActionPerformed
+        File saveFile = getSaveFile(new FileNameExtensionFilter("PNG image (*.png*)", "png"), "export_" + 
+                sdfDate.format(Calendar.getInstance().getTime())+ ".png");
+        if (saveFile!=null){
+            BufferedImage image = new BufferedImage(p.getWidth(),p.getHeight(),BufferedImage.TYPE_INT_RGB);
+            Graphics2D g = image.createGraphics();
+            p.printAll(g);
+            
+            g.setColor(Color.red);
+            g.drawString("Phạm Nhật Quang # SUMMER 2022 # CSD201 # SE1605", 10, 20);
+            
+            g.dispose();
+            
+            try{
+                ImageIO.write(image, "png", saveFile);
+            } catch ( IOException ioe){
+                System.err.println(ioe);
+            }
+        }
+    }//GEN-LAST:event_exportActionPerformed
 
     /**
      * @param args the command line arguments
@@ -301,20 +352,21 @@ public class UndirectedGraph_DrawSaveOpenExport extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(UndirectedGraph_DrawSaveOpenExport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UndirectedGraph_RemoveExport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(UndirectedGraph_DrawSaveOpenExport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UndirectedGraph_RemoveExport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(UndirectedGraph_DrawSaveOpenExport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UndirectedGraph_RemoveExport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(UndirectedGraph_DrawSaveOpenExport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UndirectedGraph_RemoveExport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new UndirectedGraph_DrawSaveOpenExport().setVisible(true);
+                new UndirectedGraph_RemoveExport().setVisible(true);
             }
         });
     }
@@ -324,6 +376,7 @@ public class UndirectedGraph_DrawSaveOpenExport extends javax.swing.JFrame {
     private javax.swing.JMenuItem DFS;
     private javax.swing.JMenuItem aShortestPath;
     private javax.swing.JMenuItem aSpanningTree;
+    private javax.swing.JMenuItem export;
     private javax.swing.JMenuItem fExit;
     private javax.swing.JMenuItem fOpen;
     private javax.swing.JMenu fSaveAs;
@@ -338,7 +391,6 @@ public class UndirectedGraph_DrawSaveOpenExport extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuBar jMenuBar2;
-    private javax.swing.JMenuItem jMenuItem1;
     private javax.swing.JRadioButton jRadioButton1;
     private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JScrollPane jScrollPane1;
