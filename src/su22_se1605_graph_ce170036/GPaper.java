@@ -103,8 +103,8 @@ public class GPaper extends JPanel {
         if (isCtrl){
             addVertex();
         } else if (isShift){
-//            removeVertex();
-//            removeEdge();
+            removeVertex();
+            removeEdge();
         } else {
             selectVertex();
             selectEdge();
@@ -209,14 +209,78 @@ public class GPaper extends JPanel {
      * 
      */
     private void removeVertex() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int vertexIndex = findVertexByLocation(mouseX, mouseY);
+        System.out.println(vertexIndex);
+        if (vertexIndex > -1){
+            GVertex vertex = this.vertices.get(vertexIndex);
+            
+            vertex.setSelected(true);
+            repaint();
+            
+            if (JOptionPane.showConfirmDialog(this, "Do you really want to delete this vertex " + vertex.getLabel() +"?", "Warning", 
+                    JOptionPane.YES_NO_OPTION)
+                    == JOptionPane.YES_OPTION){
+                removeVertex(vertexIndex);
+            } else {
+                vertex.setSelected(false);
+            }
+        }
+        
+    }
+    private void removeVertex(int index){
+        for (int from = index; from < this.numberOfVertices - 1; from++) {
+            for (int to = 0; to < this.numberOfVertices; to++) {
+                graph[from][to] = graph[from + 1][to];
+                graph[to][from] = graph[to][from + 1];
+            }
+        }
+        --this.numberOfVertices;
+        GEdge edge;
+        for (int i = this.edges.size() - 1; i >= 0; i--) {
+            edge = this.edges.get(i);
+            if (edge.getStart().getValue() == index || edge.getEnd().getValue() == index){
+                this.edges.remove(i);
+            }
+        }
+        
+        this.vertices.remove(index);
+        for (int i = index; i < this.numberOfVertices; i++) {
+            GVertex current = this.vertices.get(i);
+            current.setValue(current.getValue() - 1);
+        }
+        updateGraphInfo();
     }
 
     /**
      * 
      */
     private void removeEdge() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int edgeIndex = findEdgeByLocation(mouseX, mouseY);
+        if (edgeIndex > -1){
+            GEdge edge = this.edges.get(edgeIndex);
+            
+            String edgeLabel = edge.getStart().getLabel() + " - " + edge.getEnd().getLabel();
+            edge.setSelected(true);
+            repaint();
+            
+            if (JOptionPane.showConfirmDialog(this, "Do you really want to delete this edge " + edgeLabel +"?", "Warning", 
+                    JOptionPane.YES_NO_OPTION)
+                    == JOptionPane.YES_OPTION){
+                removeEdge(edgeIndex);
+            } else {
+                edge.setSelected(false);
+            }
+        }
+    }
+    private void removeEdge(int index){
+        GEdge edge = this.edges.get(index);
+        int from = edge.getStart().getValue();
+        int to = edge.getEnd().getValue();
+        
+        graph[from][to] = 0;
+        graph[to][from] = 0;
+        this.edges.remove(index);
+        updateGraphInfo();
     }
 
     /**
