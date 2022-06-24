@@ -6,7 +6,10 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Scanner;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -97,12 +100,12 @@ public class GPaper extends JPanel {
     }
 
     /**
-     * 
+     *
      */
     private void checkMouseClicked() {
-        if (isCtrl){
+        if (isCtrl) {
             addVertex();
-        } else if (isShift){
+        } else if (isShift) {
             removeVertex();
             removeEdge();
         } else {
@@ -113,7 +116,7 @@ public class GPaper extends JPanel {
     }
 
     /**
-     * 
+     *
      */
     private void moveVertex_dragged() {
         if (selectedVertexIndex > -1) {
@@ -124,17 +127,17 @@ public class GPaper extends JPanel {
     }
 
     /**
-     * 
+     *
      */
     private void moveVertex_start() {
         selectedVertexIndex = findVertexByLocation(mouseX, mouseY);
     }
 
     /**
-     * 
+     *
      * @param mouseX
      * @param mouseY
-     * @return 
+     * @return
      */
     private int findVertexByLocation(int mouseX, int mouseY) {
         for (int i = 0; i < vertices.size(); i++) {
@@ -146,9 +149,9 @@ public class GPaper extends JPanel {
     }
 
     /**
-     * 
+     *
      * @param value
-     * @return 
+     * @return
      */
     private int findVertexByValue(int value) {
         for (int i = 0; i < vertices.size(); i++) {
@@ -160,10 +163,10 @@ public class GPaper extends JPanel {
     }
 
     /**
-     * 
+     *
      * @param mouseX
      * @param mouseY
-     * @return 
+     * @return
      */
     private int findEdgeByLocation(int mouseX, int mouseY) {
         for (int i = 0; i < edges.size(); i++) {
@@ -175,10 +178,10 @@ public class GPaper extends JPanel {
     }
 
     /**
-     * 
+     *
      * @param from
      * @param to
-     * @return 
+     * @return
      */
     private int findEdgeByVertex(int from, int to) {
         GEdge edge;
@@ -193,41 +196,42 @@ public class GPaper extends JPanel {
     }
 
     /**
-     * 
+     *
      */
     private void addVertex() {
-        this.vertices.add(new GVertex(mouseX,mouseY,this.numberOfVertices));
+        this.vertices.add(new GVertex(mouseX, mouseY, this.numberOfVertices));
         this.numberOfVertices++;
         for (int i = 0; i < this.numberOfVertices; i++) {
             graph[i][this.numberOfVertices - 1] = 0;
-            graph[this.numberOfVertices - 1][i] = 0;    
+            graph[this.numberOfVertices - 1][i] = 0;
         }
         updateGraphInfo();
     }
 
     /**
-     * 
+     *
      */
     private void removeVertex() {
         int vertexIndex = findVertexByLocation(mouseX, mouseY);
         System.out.println(vertexIndex);
-        if (vertexIndex > -1){
+        if (vertexIndex > -1) {
             GVertex vertex = this.vertices.get(vertexIndex);
-            
+
             vertex.setSelected(true);
             repaint();
-            
-            if (JOptionPane.showConfirmDialog(this, "Do you really want to delete this vertex " + vertex.getLabel() +"?", "Warning", 
+
+            if (JOptionPane.showConfirmDialog(this, "Do you really want to delete this vertex " + vertex.getLabel() + "?", "Warning",
                     JOptionPane.YES_NO_OPTION)
-                    == JOptionPane.YES_OPTION){
+                    == JOptionPane.YES_OPTION) {
                 removeVertex(vertexIndex);
             } else {
                 vertex.setSelected(false);
             }
         }
-        
+
     }
-    private void removeVertex(int index){
+
+    private void removeVertex(int index) {
         for (int from = index; from < this.numberOfVertices - 1; from++) {
             for (int to = 0; to < this.numberOfVertices; to++) {
                 graph[from][to] = graph[from + 1][to];
@@ -238,11 +242,11 @@ public class GPaper extends JPanel {
         GEdge edge;
         for (int i = this.edges.size() - 1; i >= 0; i--) {
             edge = this.edges.get(i);
-            if (edge.getStart().getValue() == index || edge.getEnd().getValue() == index){
+            if (edge.getStart().getValue() == index || edge.getEnd().getValue() == index) {
                 this.edges.remove(i);
             }
         }
-        
+
         this.vertices.remove(index);
         for (int i = index; i < this.numberOfVertices; i++) {
             GVertex current = this.vertices.get(i);
@@ -252,31 +256,32 @@ public class GPaper extends JPanel {
     }
 
     /**
-     * 
+     *
      */
     private void removeEdge() {
         int edgeIndex = findEdgeByLocation(mouseX, mouseY);
-        if (edgeIndex > -1){
+        if (edgeIndex > -1) {
             GEdge edge = this.edges.get(edgeIndex);
-            
+
             String edgeLabel = edge.getStart().getLabel() + " - " + edge.getEnd().getLabel();
             edge.setSelected(true);
             repaint();
-            
-            if (JOptionPane.showConfirmDialog(this, "Do you really want to delete this edge " + edgeLabel +"?", "Warning", 
+
+            if (JOptionPane.showConfirmDialog(this, "Do you really want to delete this edge " + edgeLabel + "?", "Warning",
                     JOptionPane.YES_NO_OPTION)
-                    == JOptionPane.YES_OPTION){
+                    == JOptionPane.YES_OPTION) {
                 removeEdge(edgeIndex);
             } else {
                 edge.setSelected(false);
             }
         }
     }
-    private void removeEdge(int index){
+
+    private void removeEdge(int index) {
         GEdge edge = this.edges.get(index);
         int from = edge.getStart().getValue();
         int to = edge.getEnd().getValue();
-        
+
         graph[from][to] = 0;
         graph[to][from] = 0;
         this.edges.remove(index);
@@ -284,15 +289,15 @@ public class GPaper extends JPanel {
     }
 
     /**
-     * 
+     *
      */
     private void selectVertex() {
-        selectedVertexIndex =findVertexByLocation(mouseX, mouseY);
-        if (selectedVertexIndex > -1){
-            if (startIndex == -1 ){
-                startIndex= selectedVertexIndex;
+        selectedVertexIndex = findVertexByLocation(mouseX, mouseY);
+        if (selectedVertexIndex > -1) {
+            if (startIndex == -1) {
+                startIndex = selectedVertexIndex;
                 this.vertices.get(startIndex).setSelected(true);
-            } else if (startIndex == selectedVertexIndex){
+            } else if (startIndex == selectedVertexIndex) {
                 this.vertices.get(startIndex).setSelected(false);
                 startIndex = -1;
             } else {
@@ -304,11 +309,11 @@ public class GPaper extends JPanel {
     }
 
     /**
-     * 
+     *
      */
     private void selectEdge() {
         selectedEdgeIndex = findEdgeByLocation(mouseX, mouseY);
-        if (selectedEdgeIndex>-1){
+        if (selectedEdgeIndex > -1) {
             this.edges.get(selectedEdgeIndex).setSelected(true);
             repaint();
             updateEdge();
@@ -321,28 +326,28 @@ public class GPaper extends JPanel {
     /**
      * Update value of an edge
      */
-    public void updateEdge(){
+    public void updateEdge() {
         GEdge edge = this.edges.get(selectedEdgeIndex);
         this.startIndex = edge.getStart().getValue();
         this.stopIndex = edge.getEnd().getValue();
-        try{
-            this.edgeValue = Integer.parseInt(JOptionPane.showInputDialog(this,"Please enter new value for this edge: ", edge.getValue() + ""));
+        try {
+            this.edgeValue = Integer.parseInt(JOptionPane.showInputDialog(this, "Please enter new value for this edge: ", edge.getValue() + ""));
             edge.setValue(edgeValue);
             graph[stopIndex][startIndex] = edgeValue;
             graph[startIndex][stopIndex] = edgeValue;
             startIndex = stopIndex = -1;
             updateGraphInfo();
-        } catch (NumberFormatException e){
+        } catch (NumberFormatException e) {
             System.err.println(e);
         }
     }
 
     /**
-     * 
+     *
      */
     private void updateGraphInfo() {
         String giStr = "";
-        if (this.graphType == 0 ){
+        if (this.graphType == 0) {
             giStr += this.numberOfVertices + "";
             for (int i = 0; i < this.numberOfVertices; i++) {
                 giStr += "\n" + graph[i][0];
@@ -353,34 +358,60 @@ public class GPaper extends JPanel {
         } else {
             int countEdge = 0;
             for (int i = 0; i < this.numberOfVertices; i++) {
-                for (int j = 0; j < this.numberOfVertices; j++) {
-                    if (graph[i][j]>0){
-                        giStr+="\n" + vertices.get(i).getLabel() + " " + vertices.get(j).getLabel() + " " + graph[i][j];
+                for (int j = i + 1; j < this.numberOfVertices; j++) {
+                    if (graph[i][j] > 0) {
+                        giStr += "\n" + vertices.get(i).getLabel() + " " + vertices.get(j).getLabel() + " " + graph[i][j];
                         ++countEdge;
                     }
                 }
             }
-            giStr += this.numberOfVertices + " " + countEdge + giStr;
+            giStr = this.numberOfVertices + " " + countEdge + giStr;
         }
         this.txtGraphInfo.setText(giStr);
     }
-    
+
     /**
-     * Set the text of a graph information TextArea 
+     * Set the type of graph to display
+     * @param graphType
+     */
+    public void setGraphType(int graphType) {
+        this.graphType = graphType;
+        updateGraphInfo();
+    }
+
+    /**
+     * Clear data of GPaper
+     */
+    public void clear() {
+        for (int i = 0; i < numberOfVertices; i++) {
+            for (int j = 0; j < numberOfVertices; j++) {
+                graph[i][j] = 0;
+            }
+        }
+        this.vertices.clear();
+        this.edges.clear();
+        numberOfVertices = 0;
+        updateGraphInfo();
+        repaint();
+    }
+
+    /**
+     * Set the text of a graph information TextArea
+     *
      * @param txtGraphInfo TextArea to set text
      */
-    public void setTxtGraphInfo(JTextArea txtGraphInfo){
+    public void setTxtGraphInfo(JTextArea txtGraphInfo) {
         this.txtGraphInfo = txtGraphInfo;
     }
 
     @Override
     public void paint(Graphics graphics) {
         super.paint(graphics);
-        
-        this.g = (Graphics2D)graphics;
+
+        this.g = (Graphics2D) graphics;
         this.g.setColor(Color.white);
-        g.fillRect(0,0,this.getWidth(),this.getHeight());
-        
+        g.fillRect(0, 0, this.getWidth(), this.getHeight());
+
         for (int i = 0; i < edges.size(); i++) {
             edges.get(i).draw(g);
         }
@@ -390,12 +421,12 @@ public class GPaper extends JPanel {
     }
 
     /**
-     * 
+     *
      */
     private void addEdge() {
         selectedEdgeIndex = findEdgeByVertex(startIndex, stopIndex);
-        if (selectedEdgeIndex == -1){
-            this.edgeValue = Integer.parseInt(JOptionPane.showInputDialog(this, 
+        if (selectedEdgeIndex == -1) {
+            this.edgeValue = Integer.parseInt(JOptionPane.showInputDialog(this,
                     "Please enter the value for edge", "1"));
             this.edges.add(new GEdge(edgeValue, vertices.get(startIndex), vertices.get(stopIndex), false));
             graph[stopIndex][startIndex] = edgeValue;
@@ -404,6 +435,96 @@ public class GPaper extends JPanel {
         }
         updateGraphInfo();
     }
-    
-    
+
+    /**
+     * Get vertices field
+     * @return data of vertices
+     */
+    public ArrayList<GVertex> getVertices() {
+        return vertices;
+    }
+
+    /**
+     * Get number of vertices
+     * @return the number of vertices
+     */
+    public int getNumberOfVertices() {
+        return numberOfVertices;
+    }
+
+    /**
+     * Get graph field
+     * @return data of graph
+     */
+    public int[][] getGraph() {
+        return graph;
+    }
+
+    /**
+     * Read data in matrix save file
+     * @param fileOpen file to read
+     */
+    public void readMatrixDataFile(File fileOpen) {
+        try (Scanner sc = new Scanner(fileOpen)) {
+            this.edges.clear();
+            this.vertices.clear();
+            this.numberOfVertices = sc.nextInt();
+            int x, y;
+            for (int i = 0; i < this.numberOfVertices; i++) {
+                x = sc.nextInt();
+                y = sc.nextInt();
+                this.vertices.add(new GVertex(x, y, i));
+            }
+            for (int i = 0; i < this.numberOfVertices; i++) {
+                for (int j = 0; j < this.numberOfVertices; j++) {
+                    this.graph[i][j] = sc.nextInt();
+                    if (i < j && this.graph[i][j] > 0) {
+                        this.edges.add(new GEdge(this.graph[i][j], this.vertices.get(i), this.vertices.get(j), false));
+                    }
+                }
+            }
+            updateGraphInfo();
+            repaint();
+        } catch (FileNotFoundException ex) {
+            System.err.println(ex);
+        }
+    }
+
+    /**
+     * Read data in list save file 
+     * @param fileOpen file to read
+     */
+    public void readListDataFile(File fileOpen) {
+        try (Scanner sc = new Scanner(fileOpen)) {
+            this.edges.clear();
+            this.vertices.clear();
+            this.numberOfVertices = sc.nextInt();
+            int countEdge = sc.nextInt();
+            int x, y;
+            for (int i = 0; i < this.numberOfVertices; i++) {
+                x = sc.nextInt();
+                y = sc.nextInt();
+                this.vertices.add(new GVertex(x, y, i));
+            }
+            
+            for (int i = 0; i < this.numberOfVertices; i++) {
+                for (int j = 0; j < this.numberOfVertices; j++) {
+                    this.graph[i][j] = 0;
+                }
+            }
+            int start,end,value;
+            for (int i = 0; i < countEdge; i++) {
+                start = sc.nextInt();
+                end = sc.nextInt();
+                value = sc.nextInt();
+                this.edges.add(new GEdge(value, this.vertices.get(start), this.vertices.get(end), false));
+                this.graph[start][end] = this.graph[end][start] = value;
+            }
+            updateGraphInfo();
+            repaint();
+        } catch (FileNotFoundException ex) {
+            System.err.println(ex);
+        }
+    }
+
 }
