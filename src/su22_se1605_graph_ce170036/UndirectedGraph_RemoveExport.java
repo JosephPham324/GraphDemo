@@ -11,8 +11,10 @@ import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
@@ -63,8 +65,8 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
         infoType = new javax.swing.ButtonGroup();
         jLabel1 = new javax.swing.JLabel();
         pnlGraphInformation = new javax.swing.JPanel();
-        jRadioButton1 = new javax.swing.JRadioButton();
-        jRadioButton2 = new javax.swing.JRadioButton();
+        btnMatrix = new javax.swing.JRadioButton();
+        btnList = new javax.swing.JRadioButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         graphInfo = new javax.swing.JTextArea();
         pnlPaper = new javax.swing.JPanel();
@@ -98,12 +100,22 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
 
         pnlGraphInformation.setBorder(javax.swing.BorderFactory.createTitledBorder("Graph's Information"));
 
-        infoType.add(jRadioButton1);
-        jRadioButton1.setSelected(true);
-        jRadioButton1.setText("Matrix");
+        infoType.add(btnMatrix);
+        btnMatrix.setSelected(true);
+        btnMatrix.setText("Matrix");
+        btnMatrix.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnMatrixActionPerformed(evt);
+            }
+        });
 
-        infoType.add(jRadioButton2);
-        jRadioButton2.setText("List");
+        infoType.add(btnList);
+        btnList.setText("List");
+        btnList.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnListActionPerformed(evt);
+            }
+        });
 
         graphInfo.setEditable(false);
         graphInfo.setColumns(20);
@@ -116,17 +128,17 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
         pnlGraphInformationLayout.setHorizontalGroup(
             pnlGraphInformationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlGraphInformationLayout.createSequentialGroup()
-                .addComponent(jRadioButton1)
+                .addComponent(btnMatrix)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jRadioButton2))
+                .addComponent(btnList))
             .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
         );
         pnlGraphInformationLayout.setVerticalGroup(
             pnlGraphInformationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlGraphInformationLayout.createSequentialGroup()
                 .addGroup(pnlGraphInformationLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jRadioButton1)
-                    .addComponent(jRadioButton2))
+                    .addComponent(btnMatrix)
+                    .addComponent(btnList))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 260, Short.MAX_VALUE)
                 .addContainerGap())
@@ -207,6 +219,11 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
         gClear.setIcon(new javax.swing.ImageIcon(getClass().getResource("/Images/clear.png"))); // NOI18N
         gClear.setMnemonic('C');
         gClear.setText("Clear");
+        gClear.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                gClearActionPerformed(evt);
+            }
+        });
         menuGraph.add(gClear);
 
         export.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_E, java.awt.event.InputEvent.CTRL_MASK));
@@ -283,19 +300,110 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void fOpenActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fOpenActionPerformed
-        // TODO add your handling code here:
+        fileChooser.setFileFilter(new FileNameExtensionFilter("Graph data (*.mtx, *.list)", "mtx","lst"));
+        if (fileChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION){
+            if (!fileChooser.getSelectedFile().exists()){
+                return;
+            }
+            File fileOpen = fileChooser.getSelectedFile();
+            if (fileOpen.getName().endsWith(".mtx")){
+                p.readMatrixDataFile(fileOpen);
+            } else if (fileOpen.getName().endsWith(".lst")){
+                p.readListDataFile(fileOpen);
+            }
+        }
     }//GEN-LAST:event_fOpenActionPerformed
 
     private void fSaveMatrixActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fSaveMatrixActionPerformed
-        // TODO add your handling code here:
+        File saveFile = getSaveFile(new FileNameExtensionFilter("Graph data (*.mtx)", "mtx"),
+                "graph_" + sdfDate.format(Calendar.getInstance().getTime()) + ".mtx");
+        if (saveFile!=null){
+            if (saveFile.getName().endsWith(".mtx")){
+                ArrayList<GVertex> vertices = p.getVertices();
+                int[][] graph = p.getGraph();
+                int numberOfVertex = p.getNumberOfVertices();
+                FileWriter fw = null;
+                String strData = "";
+                String strXY = "";
+                
+                for (int i = 0; i < vertices.size(); i++) {
+                    strXY+="\n" + vertices.get(i).getX() + " " + vertices.get(i).getY();
+                }
+                
+                try{
+                    strData+=numberOfVertex;
+                    strData+=strXY;
+                    for (int i = 0; i < numberOfVertex; i++) {
+                        strData+="\n" + graph[i][0];
+                        for (int j = 1; j < numberOfVertex; j++) {
+                            strData+=" " + graph[i][j];
+                        }
+                    }
+                    fw = new FileWriter(saveFile);
+                    fw.write(strData);
+                    fw.flush();
+                    fw.close();
+                } catch (IOException ex){
+                    System.err.println(ex);
+                } finally{
+                    try{
+                        fw.close();
+                    } catch (IOException ex){
+                        System.err.println(ex);
+                    }
+                }
+            }
+        }
     }//GEN-LAST:event_fSaveMatrixActionPerformed
 
     private void fSaveListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fSaveListActionPerformed
-        // TODO add your handling code here:
+        File saveFile = getSaveFile(new FileNameExtensionFilter("Graph data (*.lst)", "lst"),
+                "graph_" + sdfDate.format(Calendar.getInstance().getTime()) + ".lst");
+        if (saveFile!=null){
+            if (saveFile.getName().endsWith(".lst")){
+                ArrayList<GVertex> vertices = p.getVertices();
+                int[][] graph = p.getGraph();
+                int numberOfVertex = p.getNumberOfVertices();
+                FileWriter fw = null;
+                String strData = "";
+                String strXY = "";
+                
+                for (int i = 0; i < vertices.size(); i++) {
+                    strXY+="\n" + vertices.get(i).getX() + " " + vertices.get(i).getY();
+                }
+                
+                try{
+                    int countEdge = 0;
+                    for (int i = 0; i < numberOfVertex - 1; i++) {
+                        for (int j = i + 1; j < numberOfVertex; j++) {
+                            if (graph[i][j]>0){
+                                strData+="\n" + i + " " + j + " " + graph[i][j];
+                                ++countEdge;
+                            }
+                        }
+                    }
+                    strData=numberOfVertex + " " + countEdge + strXY + strData;
+                    fw = new FileWriter(saveFile);
+                    fw.write(strData);
+                    fw.flush();
+                    fw.close();
+                } catch (IOException ex){
+                    System.err.println(ex);
+                } finally{
+                    try{
+                        fw.close();
+                    } catch (IOException ex){
+                        System.err.println(ex);
+                    }
+                }
+            }
+        }
     }//GEN-LAST:event_fSaveListActionPerformed
 
     private void fExitActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fExitActionPerformed
-        // TODO add your handling code here:
+        System.exit(0);
+        this.setVisible(false);
+        this.dispose();
     }//GEN-LAST:event_fExitActionPerformed
     public File getSaveFile(FileNameExtensionFilter filter, String fName){
         fileChooser.setFileFilter(filter);
@@ -334,6 +442,18 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
             }
         }
     }//GEN-LAST:event_exportActionPerformed
+
+    private void btnMatrixActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnMatrixActionPerformed
+        this.p.setGraphType(0);
+    }//GEN-LAST:event_btnMatrixActionPerformed
+
+    private void btnListActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnListActionPerformed
+        this.p.setGraphType(1);
+    }//GEN-LAST:event_btnListActionPerformed
+
+    private void gClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gClearActionPerformed
+        this.p.clear();
+    }//GEN-LAST:event_gClearActionPerformed
 
     /**
      * @param args the command line arguments
@@ -376,6 +496,8 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
     private javax.swing.JMenuItem DFS;
     private javax.swing.JMenuItem aShortestPath;
     private javax.swing.JMenuItem aSpanningTree;
+    private javax.swing.JRadioButton btnList;
+    private javax.swing.JRadioButton btnMatrix;
     private javax.swing.JMenuItem export;
     private javax.swing.JMenuItem fExit;
     private javax.swing.JMenuItem fOpen;
@@ -391,8 +513,6 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
     private javax.swing.JMenu jMenu3;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuBar jMenuBar2;
-    private javax.swing.JRadioButton jRadioButton1;
-    private javax.swing.JRadioButton jRadioButton2;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JPopupMenu.Separator jSeparator1;
     private javax.swing.JMenu menuAlgorithm;
