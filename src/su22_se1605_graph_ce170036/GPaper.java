@@ -9,7 +9,10 @@ import java.awt.event.MouseMotionAdapter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Scanner;
+import java.util.Stack;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
@@ -45,10 +48,26 @@ public class GPaper extends JPanel {
     private int mouseX, mouseY, selectedVertexIndex = - 1, selectedEdgeIndex = -1;
     private boolean isShift = false, isCtrl = false;
 
+    private String result = ""; //Result of BFS, DFS traversal
+
+    boolean isVisited[];
+    Queue<Integer> q;
+    Stack<Integer> s;
+
     /**
      * Create and initialize new GPaper instance
      */
     public GPaper() {
+        distance = new int[MAX_VERTEX];
+        theVertexBefore = new int[MAX_VERTEX];
+
+        q = new LinkedList<>();
+        s = new Stack<>();
+        isVisited = new boolean[MAX_VERTEX];
+
+        traversalReset();
+        resetPrim();
+
         this.graph = new int[MAX_VERTEX][MAX_VERTEX];
         for (int i = 0; i < MAX_VERTEX; i++) {
             for (int j = 0; j < MAX_VERTEX; j++) {
@@ -97,6 +116,15 @@ public class GPaper extends JPanel {
             }
 
         });
+    }
+
+    private void traversalReset() {
+        result = "";
+        for (int i = 0; i < isVisited.length; i++) {
+            isVisited[i] = false;
+        }
+        q.clear();
+        s.clear();
     }
 
     /**
@@ -372,7 +400,8 @@ public class GPaper extends JPanel {
 
     /**
      * Set the type of graph to display
-     * @param graphType
+     *
+     * @param graphType Type o graph representation (0 for matrix, 1 for list)
      */
     public void setGraphType(int graphType) {
         this.graphType = graphType;
@@ -418,6 +447,53 @@ public class GPaper extends JPanel {
         for (int i = 0; i < vertices.size(); i++) {
             vertices.get(i).draw(g);
         }
+
+        if (!result.equals("")) {
+            g.setColor(Color.red);
+            g.drawString(result, 10, 20);
+            result = "";
+        }
+
+        if (isDrawPrimPath) {
+            String str = "";
+            if (isGraphConnected) {
+                int sum = 0;
+                for (int i = 0; i < numberOfVertices; i++) {
+                    sum += distance[i];
+                }
+
+                str = "The minimum spanning tree has the value: " + sum;
+
+                int fromVertex;
+                int toVertex;
+                int edgeIndex;
+                for (int i = 0; i < numberOfVertices; i++) {
+                    fromVertex = theVertexBefore[i];
+                    toVertex = i;
+                    
+                    if (fromVertex != toVertex){
+                        edgeIndex = findEdgeByVertex(fromVertex, toVertex);
+                        if (edgeIndex!=-1){
+                            edges.get(edgeIndex).setSelected(true);
+                            edges.get(edgeIndex).draw(g);
+                             edges.get(edgeIndex).setSelected(false);
+                        }
+                    }
+                }
+                
+                for (int i = 0; i < numberOfVertices; i++) {
+                    vertices.get(i).setSelected(true);
+                    vertices.get(i).draw(g);
+                    vertices.get(i).setSelected(false);
+                }
+            } else {
+                str = "The graph is not connected";
+            }
+
+            g.setColor(Color.red);
+            g.drawString(str, 10, 20);
+            isDrawPrimPath = false;
+        }
     }
 
     /**
@@ -438,6 +514,7 @@ public class GPaper extends JPanel {
 
     /**
      * Get vertices field
+     *
      * @return data of vertices
      */
     public ArrayList<GVertex> getVertices() {
@@ -446,6 +523,7 @@ public class GPaper extends JPanel {
 
     /**
      * Get number of vertices
+     *
      * @return the number of vertices
      */
     public int getNumberOfVertices() {
@@ -454,6 +532,7 @@ public class GPaper extends JPanel {
 
     /**
      * Get graph field
+     *
      * @return data of graph
      */
     public int[][] getGraph() {
@@ -462,6 +541,7 @@ public class GPaper extends JPanel {
 
     /**
      * Read data in matrix save file
+     *
      * @param fileOpen file to read
      */
     public void readMatrixDataFile(File fileOpen) {
@@ -491,7 +571,8 @@ public class GPaper extends JPanel {
     }
 
     /**
-     * Read data in list save file 
+     * Read data in list save file
+     *
      * @param fileOpen file to read
      */
     public void readListDataFile(File fileOpen) {
@@ -506,13 +587,13 @@ public class GPaper extends JPanel {
                 y = sc.nextInt();
                 this.vertices.add(new GVertex(x, y, i));
             }
-            
+
             for (int i = 0; i < this.numberOfVertices; i++) {
                 for (int j = 0; j < this.numberOfVertices; j++) {
                     this.graph[i][j] = 0;
                 }
             }
-            int start,end,value;
+            int start, end, value;
             for (int i = 0; i < countEdge; i++) {
                 start = sc.nextInt();
                 end = sc.nextInt();
@@ -527,4 +608,114 @@ public class GPaper extends JPanel {
         }
     }
 
+    /**
+     * Perform Breadth First Search and store traversal result in result String
+     */
+    public void BFS() {
+        traversalReset();
+        int startVertex = Integer.parseInt(JOptionPane.showInputDialog(this, "Please enter value of vertex to start traversal", "0"));
+        isVisited[startVertex] = true;
+        int fromVertex;
+        q.add(startVertex);
+        result = "The BFS traversal from vertex " + startVertex + " is: ";
+
+        while (!q.isEmpty()) {
+            fromVertex = q.poll();
+            result += fromVertex + ", ";
+            for (int toVertex = 0; toVertex < numberOfVertices; toVertex++) {
+                if (!isVisited[toVertex] && graph[fromVertex][toVertex] > 0) {
+                    q.add(toVertex);
+                    isVisited[toVertex] = true;
+                }
+            }
+        }
+        repaint();
+    }
+
+    /**
+     * Perform Depth First Search and store traversal result in result String
+     */
+    public void DFS() {
+        traversalReset();
+        int startVertex = Integer.parseInt(JOptionPane.showInputDialog(this, "Please enter value of vertex to start traversal", "0"));
+        int fromVertex;
+        s.push(startVertex);
+        result = "The DFS traversal from vertex " + startVertex + " is: ";
+
+        while (!s.isEmpty()) {
+            fromVertex = s.pop();
+            if (!isVisited[fromVertex]) {
+                result += fromVertex + ", ";
+                isVisited[fromVertex] = true;
+                for (int toVertex = numberOfVertices - 1; toVertex >= 0; toVertex--) {
+                    if (!isVisited[toVertex] && graph[fromVertex][toVertex] > 0) {
+                        s.push(toVertex);
+                    }
+                }
+            }
+
+        }
+        repaint();
+    }
+
+    int[] distance; //Store distance of visited edges in Prim's algorithm
+    int[] theVertexBefore; //beforeVertex -> currentVertex
+    boolean isGraphConnected; //To mark if the graph is connected
+    boolean isDrawPrimPath = false; //Inform paint method to draw Prim path or not
+
+    /**
+     * Find unvisited vertex with shortest distance
+     * @return index of vertex
+     */
+    public int findNearestVertex() {
+        int minIndex = -1, minValue = Integer.MAX_VALUE;
+        for (int i = 0; i < numberOfVertices; i++) {
+            if (!isVisited[i] && distance[i] < minValue) {
+                minValue = distance[i];
+                minIndex = i;
+            }
+        }
+        return minIndex;
+    }
+
+    /**
+     * Perform Prim's algorithm to find minimum spanning tree
+     */
+    public void Prim() {
+        resetPrim();
+        distance[0] = 0;
+        int currentVertex;
+        isDrawPrimPath = true;
+        isGraphConnected = true;
+
+        for (int i = 0; i < numberOfVertices; i++) {
+            currentVertex = findNearestVertex();
+            if (currentVertex == -1) {
+                isGraphConnected = false;
+                break;
+            } else {
+                isVisited[currentVertex] = true;
+                for (int toVertex = 0; toVertex < numberOfVertices; toVertex++) {
+                    if (!isVisited[toVertex] && graph[currentVertex][toVertex] > 0
+                            && graph[currentVertex][toVertex] < distance[toVertex]) {
+                        distance[toVertex] = graph[currentVertex][toVertex];
+                        theVertexBefore[toVertex] = currentVertex;
+                    }
+                }
+            }
+        }
+        repaint();
+
+    }
+
+    /**
+     *
+     */
+    public void resetPrim() {
+        for (int i = 0; i < MAX_VERTEX; i++) {
+            distance[i] = Integer.MAX_VALUE;
+            theVertexBefore[i] = i;
+            isVisited[i] = false;
+        }
+    }
 }
