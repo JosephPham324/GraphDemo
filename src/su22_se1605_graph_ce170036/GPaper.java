@@ -118,6 +118,9 @@ public class GPaper extends JPanel {
         });
     }
 
+    /**
+     * Reset variables related to traversal
+     */
     private void traversalReset() {
         result = "";
         for (int i = 0; i < isVisited.length; i++) {
@@ -128,23 +131,23 @@ public class GPaper extends JPanel {
     }
 
     /**
-     *
+     * Check mouse click scenarios
      */
     private void checkMouseClicked() {
-        if (isCtrl) {
-            addVertex();
-        } else if (isShift) {
-            removeVertex();
-            removeEdge();
-        } else {
-            selectVertex();
-            selectEdge();
+        if (isCtrl) { //If Control is pressed
+            addVertex(); //Add vertex
+        } else if (isShift) { //If Shift is pressed
+            removeVertex(); //Remove vertex or
+            removeEdge(); //Remove edge
+        } else {//If nothing is pressed
+            selectVertex(); //Select vertex or
+            selectEdge(); //Select edge
         }
         repaint();
     }
 
     /**
-     *
+     * Move the selected vertex based on mouse location
      */
     private void moveVertex_dragged() {
         if (selectedVertexIndex > -1) {
@@ -155,17 +158,18 @@ public class GPaper extends JPanel {
     }
 
     /**
-     *
+     * Preparation for move vertex, select a vertex based on mouse location
      */
     private void moveVertex_start() {
         selectedVertexIndex = findVertexByLocation(mouseX, mouseY);
     }
 
     /**
+     * Find a vertex based on mouse location
      *
-     * @param mouseX
-     * @param mouseY
-     * @return
+     * @param mouseX Mouse X coordinate
+     * @param mouseY Mouse Y coordinate
+     * @return The vertex, or -1 if not found
      */
     private int findVertexByLocation(int mouseX, int mouseY) {
         for (int i = 0; i < vertices.size(); i++) {
@@ -191,10 +195,11 @@ public class GPaper extends JPanel {
     }
 
     /**
+     * Find an edge by coordinates
      *
-     * @param mouseX
-     * @param mouseY
-     * @return
+     * @param mouseX X coordinate
+     * @param mouseY Y coordinate
+     * @return The edge, or -1 if not found
      */
     private int findEdgeByLocation(int mouseX, int mouseY) {
         for (int i = 0; i < edges.size(); i++) {
@@ -206,10 +211,11 @@ public class GPaper extends JPanel {
     }
 
     /**
+     * Find an edge using its start and ending vertices
      *
-     * @param from
-     * @param to
-     * @return
+     * @param from Start vertex
+     * @param to End vertex
+     * @return The edge, or -1 if not found
      */
     private int findEdgeByVertex(int from, int to) {
         GEdge edge;
@@ -224,7 +230,7 @@ public class GPaper extends JPanel {
     }
 
     /**
-     *
+     * Add a new vertex in the location of the mouse
      */
     private void addVertex() {
         this.vertices.add(new GVertex(mouseX, mouseY, this.numberOfVertices));
@@ -237,7 +243,7 @@ public class GPaper extends JPanel {
     }
 
     /**
-     *
+     * Remove an existing vertex in the location of the mouse
      */
     private void removeVertex() {
         int vertexIndex = findVertexByLocation(mouseX, mouseY);
@@ -259,6 +265,11 @@ public class GPaper extends JPanel {
 
     }
 
+    /**
+     * Remove a vertex using its index
+     *
+     * @param index
+     */
     private void removeVertex(int index) {
         for (int from = index; from < this.numberOfVertices - 1; from++) {
             for (int to = 0; to < this.numberOfVertices; to++) {
@@ -284,7 +295,7 @@ public class GPaper extends JPanel {
     }
 
     /**
-     *
+     * Remove an edge in the location of the mouse
      */
     private void removeEdge() {
         int edgeIndex = findEdgeByLocation(mouseX, mouseY);
@@ -305,6 +316,11 @@ public class GPaper extends JPanel {
         }
     }
 
+    /**
+     * Remove an edge using its index
+     *
+     * @param index
+     */
     private void removeEdge(int index) {
         GEdge edge = this.edges.get(index);
         int from = edge.getStart().getValue();
@@ -317,7 +333,7 @@ public class GPaper extends JPanel {
     }
 
     /**
-     *
+     * Select a vertex in the location of the mouse
      */
     private void selectVertex() {
         selectedVertexIndex = findVertexByLocation(mouseX, mouseY);
@@ -337,7 +353,7 @@ public class GPaper extends JPanel {
     }
 
     /**
-     *
+     * Select an edge in the location of the mouse
      */
     private void selectEdge() {
         selectedEdgeIndex = findEdgeByLocation(mouseX, mouseY);
@@ -371,7 +387,7 @@ public class GPaper extends JPanel {
     }
 
     /**
-     *
+     * Update String representation of graph (matrix of list)
      */
     private void updateGraphInfo() {
         String giStr = "";
@@ -454,6 +470,35 @@ public class GPaper extends JPanel {
             result = "";
         }
 
+        if (!dijkstraPath.equals("")) {
+
+            if (!dijkstraPath.equals("Invalid start or end vertex! Must be a vertex in the graph.")) {
+
+                String[] verticesToPaint = dijkstraPath.substring(dijkstraPath.indexOf(":") + 2).split("->");
+
+                for (int i = 0; i < verticesToPaint.length; i++) {
+                    int currentVertex = Integer.parseInt(verticesToPaint[i]);
+                    vertices.get(currentVertex).setSelected(true);
+                    vertices.get(currentVertex).draw(g);
+                    vertices.get(currentVertex).setSelected(false);
+                    if (i > 0) {
+                        int previousVertex = Integer.parseInt(verticesToPaint[i - 1]);
+                        int currentEdge = findEdgeByVertex(previousVertex, currentVertex);
+
+                        if (currentEdge > -1) {
+                            edges.get(currentEdge).setSelected(true);
+                            edges.get(currentEdge).draw(g);
+                            edges.get(currentEdge).setSelected(false);
+                        }
+                    }
+                }
+            }
+
+            g.setColor(Color.red);
+            g.drawString(dijkstraPath, 10, 20);
+            dijkstraPath = "";
+        }
+
         if (isDrawPrimPath) {
             String str = "";
             if (isGraphConnected) {
@@ -470,17 +515,16 @@ public class GPaper extends JPanel {
                 for (int i = 0; i < numberOfVertices; i++) {
                     fromVertex = theVertexBefore[i];
                     toVertex = i;
-                    
-                    if (fromVertex != toVertex){
+                    if (fromVertex != toVertex) {
                         edgeIndex = findEdgeByVertex(fromVertex, toVertex);
-                        if (edgeIndex!=-1){
+                        if (edgeIndex != -1) {
                             edges.get(edgeIndex).setSelected(true);
                             edges.get(edgeIndex).draw(g);
-                             edges.get(edgeIndex).setSelected(false);
+                            edges.get(edgeIndex).setSelected(false);
                         }
                     }
                 }
-                
+
                 for (int i = 0; i < numberOfVertices; i++) {
                     vertices.get(i).setSelected(true);
                     vertices.get(i).draw(g);
@@ -497,7 +541,7 @@ public class GPaper extends JPanel {
     }
 
     /**
-     *
+     * Add a new edge for selected vertices
      */
     private void addEdge() {
         selectedEdgeIndex = findEdgeByVertex(startIndex, stopIndex);
@@ -662,9 +706,11 @@ public class GPaper extends JPanel {
     int[] theVertexBefore; //beforeVertex -> currentVertex
     boolean isGraphConnected; //To mark if the graph is connected
     boolean isDrawPrimPath = false; //Inform paint method to draw Prim path or not
+    String dijkstraPath = ""; //Store path for Dijkstra's algorithm
 
     /**
      * Find unvisited vertex with shortest distance
+     *
      * @return index of vertex
      */
     public int findNearestVertex() {
@@ -709,7 +755,62 @@ public class GPaper extends JPanel {
     }
 
     /**
-     *
+     * Perform Dijkstra's algorithm to find shortest path between two vertices
+     */
+    public void Dijkstra() {
+        int startVertex = Integer.parseInt(JOptionPane.showInputDialog(this, "Please enter the start vertex", "0"));
+        int endVertex = Integer.parseInt(JOptionPane.showInputDialog(this, "Please enter the end vertex", (numberOfVertices - 1)) + "");
+
+        resetPrim();
+
+        if (startVertex < 0 || startVertex > numberOfVertices - 1 || endVertex < 0 || endVertex > numberOfVertices - 1) {
+            dijkstraPath = "Invalid start or end vertex! Must be a vertex in the graph.";
+            isDrawPrimPath = false;
+            repaint();
+            return;
+        }
+
+        distance[startVertex] = 0;
+        int currentVertex;
+
+        isGraphConnected = true;
+
+        for (int i = 0; i < numberOfVertices; i++) {
+            currentVertex = findNearestVertex();
+            if (currentVertex == -1) {
+                isGraphConnected = false;
+                break;
+            } else {
+                isVisited[currentVertex] = true;
+                for (int toVertex = 0; toVertex < numberOfVertices; toVertex++) {
+                    if (!isVisited[toVertex]
+                            && graph[currentVertex][toVertex] > 0
+                            && distance[currentVertex] + graph[currentVertex][toVertex] < distance[toVertex]) {
+                        distance[toVertex] = distance[currentVertex] + graph[currentVertex][toVertex];
+                        theVertexBefore[toVertex] = currentVertex;
+                    }
+                }
+            }
+        }
+        if (isGraphConnected) {
+            currentVertex = endVertex;
+            String path = "" + endVertex;
+            while (currentVertex != startVertex) {
+                currentVertex = theVertexBefore[currentVertex];
+                path = currentVertex + "->" + path;
+            }
+            dijkstraPath = "The length of the shortest path from " + startVertex + " to " + endVertex + " is "
+                    + distance[endVertex] + ": " + path;
+        } else {
+            dijkstraPath = "Can't find path from " + startVertex + " to " + endVertex + "!";
+        }
+        isDrawPrimPath = false;
+        repaint();
+
+    }
+
+    /**
+     * Reset variables related to Prim's algorithm
      */
     public void resetPrim() {
         for (int i = 0; i < MAX_VERTEX; i++) {
@@ -717,5 +818,6 @@ public class GPaper extends JPanel {
             theVertexBefore[i] = i;
             isVisited[i] = false;
         }
+        dijkstraPath = "";
     }
 }

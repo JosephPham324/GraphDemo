@@ -245,6 +245,11 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
         aShortestPath.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_H, java.awt.event.InputEvent.CTRL_MASK));
         aShortestPath.setMnemonic('s');
         aShortestPath.setText("Find Shortest Path");
+        aShortestPath.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                aShortestPathActionPerformed(evt);
+            }
+        });
         menuAlgorithm.add(aShortestPath);
 
         aSpanningTree.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.event.InputEvent.CTRL_MASK));
@@ -481,6 +486,10 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
     private void aSpanningTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aSpanningTreeActionPerformed
         this.p.Prim();
     }//GEN-LAST:event_aSpanningTreeActionPerformed
+
+    private void aShortestPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aShortestPathActionPerformed
+        p.Dijkstra();
+    }//GEN-LAST:event_aShortestPathActionPerformed
 
     /**
      * @param args the command line arguments
