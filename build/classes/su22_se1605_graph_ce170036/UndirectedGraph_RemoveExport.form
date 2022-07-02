@@ -156,6 +156,9 @@
                 <Property name="mnemonic" type="int" value="115"/>
                 <Property name="text" type="java.lang.String" value="Find Shortest Path"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="aShortestPathActionPerformed"/>
+              </Events>
             </MenuItem>
             <MenuItem class="javax.swing.JMenuItem" name="aSpanningTree">
               <Properties>
@@ -164,6 +167,9 @@
                 </Property>
                 <Property name="text" type="java.lang.String" value="Find Minimum Spanning Tree"/>
               </Properties>
+              <Events>
+                <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="aSpanningTreeActionPerformed"/>
+              </Events>
             </MenuItem>
             <Menu class="javax.swing.JMenu" name="jMenu3">
               <Properties>
@@ -178,6 +184,9 @@
                     <Property name="mnemonic" type="int" value="66"/>
                     <Property name="text" type="java.lang.String" value="BFS"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="BFSActionPerformed"/>
+                  </Events>
                 </MenuItem>
                 <MenuItem class="javax.swing.JMenuItem" name="DFS">
                   <Properties>
@@ -187,6 +196,9 @@
                     <Property name="mnemonic" type="int" value="68"/>
                     <Property name="text" type="java.lang.String" value="DFS"/>
                   </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="DFSActionPerformed"/>
+                  </Events>
                 </MenuItem>
               </SubComponents>
             </Menu>

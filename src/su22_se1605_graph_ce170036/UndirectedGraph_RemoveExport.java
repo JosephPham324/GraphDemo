@@ -245,10 +245,20 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
         aShortestPath.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_H, java.awt.event.InputEvent.CTRL_MASK));
         aShortestPath.setMnemonic('s');
         aShortestPath.setText("Find Shortest Path");
+        aShortestPath.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                aShortestPathActionPerformed(evt);
+            }
+        });
         menuAlgorithm.add(aShortestPath);
 
         aSpanningTree.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_M, java.awt.event.InputEvent.CTRL_MASK));
         aSpanningTree.setText("Find Minimum Spanning Tree");
+        aSpanningTree.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                aSpanningTreeActionPerformed(evt);
+            }
+        });
         menuAlgorithm.add(aSpanningTree);
 
         jMenu3.setText("Traversing");
@@ -256,11 +266,21 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
         BFS.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_B, java.awt.event.InputEvent.CTRL_MASK));
         BFS.setMnemonic('B');
         BFS.setText("BFS");
+        BFS.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                BFSActionPerformed(evt);
+            }
+        });
         jMenu3.add(BFS);
 
         DFS.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_MASK));
         DFS.setMnemonic('D');
         DFS.setText("DFS");
+        DFS.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                DFSActionPerformed(evt);
+            }
+        });
         jMenu3.add(DFS);
 
         menuAlgorithm.add(jMenu3);
@@ -454,6 +474,22 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
     private void gClearActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_gClearActionPerformed
         this.p.clear();
     }//GEN-LAST:event_gClearActionPerformed
+
+    private void BFSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_BFSActionPerformed
+        this.p.BFS();;
+    }//GEN-LAST:event_BFSActionPerformed
+
+    private void DFSActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_DFSActionPerformed
+        this.p.DFS();
+    }//GEN-LAST:event_DFSActionPerformed
+
+    private void aSpanningTreeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aSpanningTreeActionPerformed
+        this.p.Prim();
+    }//GEN-LAST:event_aSpanningTreeActionPerformed
+
+    private void aShortestPathActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_aShortestPathActionPerformed
+        p.Dijkstra();
+    }//GEN-LAST:event_aShortestPathActionPerformed
 
     /**
      * @param args the command line arguments
