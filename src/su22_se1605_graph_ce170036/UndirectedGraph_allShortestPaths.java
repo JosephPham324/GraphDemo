@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package su22_se1605_graph_ce170036;
 
 import java.awt.BorderLayout;
@@ -25,14 +20,14 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  *
  * @author Pham Nhat Quang CE170036
  */
-public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
+public class UndirectedGraph_allShortestPaths extends javax.swing.JFrame {
     private GPaper p = null;
     JFileChooser fileChooser;
     SimpleDateFormat sdfDate = new SimpleDateFormat("yyyyMMdd_HHmmss");
     /**
      * Creates new form UndirectedGraph_DrawSaveOpenExport
      */
-    public UndirectedGraph_RemoveExport() {
+    public UndirectedGraph_allShortestPaths() {
         initComponents();
          try{
         this.setIconImage(Toolkit.getDefaultToolkit().getImage(getClass().getResource("/Images/graph-icon.png")));
@@ -508,21 +503,23 @@ public class UndirectedGraph_RemoveExport extends javax.swing.JFrame {
                 }
             }
         } catch (ClassNotFoundException ex) {
-            java.util.logging.Logger.getLogger(UndirectedGraph_RemoveExport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UndirectedGraph_allShortestPaths.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (InstantiationException ex) {
-            java.util.logging.Logger.getLogger(UndirectedGraph_RemoveExport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UndirectedGraph_allShortestPaths.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (IllegalAccessException ex) {
-            java.util.logging.Logger.getLogger(UndirectedGraph_RemoveExport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UndirectedGraph_allShortestPaths.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         } catch (javax.swing.UnsupportedLookAndFeelException ex) {
-            java.util.logging.Logger.getLogger(UndirectedGraph_RemoveExport.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+            java.util.logging.Logger.getLogger(UndirectedGraph_allShortestPaths.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
+        //</editor-fold>
+        //</editor-fold>
         //</editor-fold>
         //</editor-fold>
 
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new UndirectedGraph_RemoveExport().setVisible(true);
+                new UndirectedGraph_allShortestPaths().setVisible(true);
             }
         });
     }

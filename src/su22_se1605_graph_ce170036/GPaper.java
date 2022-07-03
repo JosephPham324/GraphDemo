@@ -46,7 +46,7 @@ public class GPaper extends JPanel {
 
     private Graphics2D g = null;
     private int mouseX, mouseY, selectedVertexIndex = - 1, selectedEdgeIndex = -1;
-    private boolean isShift = false, isCtrl = false;
+    private boolean isShift = false, isCtrl = false, isRightClicked;
 
     private String result = ""; //Result of BFS, DFS traversal
 
@@ -67,6 +67,7 @@ public class GPaper extends JPanel {
 
         traversalReset();
         resetPrim();
+        resetDijkstra();
 
         this.graph = new int[MAX_VERTEX][MAX_VERTEX];
         for (int i = 0; i < MAX_VERTEX; i++) {
@@ -102,7 +103,7 @@ public class GPaper extends JPanel {
 
                 isCtrl = e.isControlDown();
                 isShift = e.isShiftDown();
-
+                isRightClicked = e.getModifiers() == MouseEvent.BUTTON3_MASK;
                 checkMouseClicked();
             }
 
@@ -139,9 +140,15 @@ public class GPaper extends JPanel {
         } else if (isShift) { //If Shift is pressed
             removeVertex(); //Remove vertex or
             removeEdge(); //Remove edge
+        } else if (isRightClicked) {
+            pathToDisplay++;
+            if (pathToDisplay == dijkstraPath.size()) {
+                pathToDisplay = 0;
+            }
         } else {//If nothing is pressed
             selectVertex(); //Select vertex or
             selectEdge(); //Select edge
+
         }
         repaint();
     }
@@ -437,6 +444,9 @@ public class GPaper extends JPanel {
         this.edges.clear();
         numberOfVertices = 0;
         updateGraphInfo();
+        resetDijkstra();
+        resetPrim();
+        drawDijkstra = false;
         repaint();
     }
 
@@ -470,33 +480,41 @@ public class GPaper extends JPanel {
             result = "";
         }
 
-        if (!dijkstraPath.equals("")) {
+        if (drawDijkstra) {
+            if (!DijkstraMessage.equals("")) {
 
-            if (!dijkstraPath.equals("Invalid start or end vertex! Must be a vertex in the graph.")) {
+                g.setColor(Color.red);
+                g.drawString(DijkstraMessage, 10, 20);
 
-                String[] verticesToPaint = dijkstraPath.substring(dijkstraPath.indexOf(":") + 2).split("->");
+                if (!dijkstraPath.isEmpty()) {
+                    for (int i = 0; i < dijkstraPath.size(); i++) {
+                        g.drawString("#" + (i + 1) + ". " + dijkstraPath.get(i), 10, 40 + i * 20);
+                    }
+                }
 
-                for (int i = 0; i < verticesToPaint.length; i++) {
-                    int currentVertex = Integer.parseInt(verticesToPaint[i]);
-                    vertices.get(currentVertex).setSelected(true);
-                    vertices.get(currentVertex).draw(g);
-                    vertices.get(currentVertex).setSelected(false);
-                    if (i > 0) {
-                        int previousVertex = Integer.parseInt(verticesToPaint[i - 1]);
-                        int currentEdge = findEdgeByVertex(previousVertex, currentVertex);
+                if (!DijkstraMessage.equals("Invalid start or end vertex! Must be a vertex in the graph.")) {
 
-                        if (currentEdge > -1) {
-                            edges.get(currentEdge).setSelected(true);
-                            edges.get(currentEdge).draw(g);
-                            edges.get(currentEdge).setSelected(false);
+                    String[] verticesToPaint = dijkstraPath.get(pathToDisplay).split("->");
+
+                    for (int i = 0; i < verticesToPaint.length; i++) {
+                        int currentVertex = Integer.parseInt(verticesToPaint[i]);
+                        vertices.get(currentVertex).setSelected(true);
+                        vertices.get(currentVertex).draw(g);
+                        vertices.get(currentVertex).setSelected(false);
+                        if (i > 0) {
+                            int previousVertex = Integer.parseInt(verticesToPaint[i - 1]);
+                            int currentEdge = findEdgeByVertex(previousVertex, currentVertex);
+
+                            if (currentEdge > -1) {
+                                edges.get(currentEdge).setSelected(true);
+                                edges.get(currentEdge).draw(g);
+                                edges.get(currentEdge).setSelected(false);
+                            }
                         }
                     }
                 }
-            }
 
-            g.setColor(Color.red);
-            g.drawString(dijkstraPath, 10, 20);
-            dijkstraPath = "";
+            }
         }
 
         if (isDrawPrimPath) {
@@ -608,6 +626,7 @@ public class GPaper extends JPanel {
                 }
             }
             updateGraphInfo();
+            drawDijkstra = false;
             repaint();
         } catch (FileNotFoundException ex) {
             System.err.println(ex);
@@ -646,6 +665,7 @@ public class GPaper extends JPanel {
                 this.graph[start][end] = this.graph[end][start] = value;
             }
             updateGraphInfo();
+            drawDijkstra = false;
             repaint();
         } catch (FileNotFoundException ex) {
             System.err.println(ex);
@@ -656,6 +676,7 @@ public class GPaper extends JPanel {
      * Perform Breadth First Search and store traversal result in result String
      */
     public void BFS() {
+        drawDijkstra = false;
         traversalReset();
         int startVertex = Integer.parseInt(JOptionPane.showInputDialog(this, "Please enter value of vertex to start traversal", "0"));
         isVisited[startVertex] = true;
@@ -680,6 +701,7 @@ public class GPaper extends JPanel {
      * Perform Depth First Search and store traversal result in result String
      */
     public void DFS() {
+        drawDijkstra = false;
         traversalReset();
         int startVertex = Integer.parseInt(JOptionPane.showInputDialog(this, "Please enter value of vertex to start traversal", "0"));
         int fromVertex;
@@ -706,7 +728,6 @@ public class GPaper extends JPanel {
     int[] theVertexBefore; //beforeVertex -> currentVertex
     boolean isGraphConnected; //To mark if the graph is connected
     boolean isDrawPrimPath = false; //Inform paint method to draw Prim path or not
-    String dijkstraPath = ""; //Store path for Dijkstra's algorithm
 
     /**
      * Find unvisited vertex with shortest distance
@@ -728,6 +749,7 @@ public class GPaper extends JPanel {
      * Perform Prim's algorithm to find minimum spanning tree
      */
     public void Prim() {
+        drawDijkstra = false;
         resetPrim();
         distance[0] = 0;
         int currentVertex;
@@ -754,17 +776,60 @@ public class GPaper extends JPanel {
 
     }
 
+    ArrayList<Integer> dijkstra_theVertexBefore[];
+    ArrayList<String> dijkstraPath; //Store path for Dijkstra's algorithm
+    String DijkstraMessage;
+    int pathToDisplay;
+    boolean drawDijkstra;
+
+    /**
+     * Reset variables related to Dijkstra 's algorithm
+     */
+    public void resetDijkstra() {
+        dijkstra_theVertexBefore = new ArrayList[MAX_VERTEX];
+        for (int i = 0; i < MAX_VERTEX; i++) {
+            distance[i] = Integer.MAX_VALUE;
+            dijkstra_theVertexBefore[i] = new ArrayList();
+            dijkstra_theVertexBefore[i].add(i);
+            isVisited[i] = false;
+        }
+        dijkstraPath = new ArrayList<>();
+        pathToDisplay = 0;
+        DijkstraMessage = "";
+    }
+
+    public void Dijkstra_displayPath(String path, int currentVertex, int startVertex, int endVertex) {
+        if (currentVertex != endVertex) {
+            path = currentVertex + "->" + path;
+        }
+        if (currentVertex == startVertex) {
+            dijkstraPath.add(path);
+            System.out.println("Visited");
+        } else {
+            for (int i = 0; i < dijkstra_theVertexBefore[currentVertex].size(); i++) {
+                Dijkstra_displayPath(path, dijkstra_theVertexBefore[currentVertex].get(i), startVertex, endVertex);
+            }
+        }
+    }
+
     /**
      * Perform Dijkstra's algorithm to find shortest path between two vertices
      */
     public void Dijkstra() {
-        int startVertex = Integer.parseInt(JOptionPane.showInputDialog(this, "Please enter the start vertex", "0"));
-        int endVertex = Integer.parseInt(JOptionPane.showInputDialog(this, "Please enter the end vertex", (numberOfVertices - 1)) + "");
-
-        resetPrim();
+        drawDijkstra = true;
+        int startVertex = -1;
+        int endVertex = -1;
+        try {
+            startVertex = Integer.parseInt(JOptionPane.showInputDialog(this, "Please enter the start vertex", "0"));
+            endVertex = Integer.parseInt(JOptionPane.showInputDialog(this, "Please enter the end vertex", (numberOfVertices - 1)) + "");
+        } catch (NumberFormatException nfe) {
+            DijkstraMessage = "You must enter integer for selecting vertex!";
+            System.err.println(nfe);
+        }
+        resetDijkstra();
 
         if (startVertex < 0 || startVertex > numberOfVertices - 1 || endVertex < 0 || endVertex > numberOfVertices - 1) {
-            dijkstraPath = "Invalid start or end vertex! Must be a vertex in the graph.";
+            DijkstraMessage = "Invalid start or end vertex! Must be a vertex in the graph.";
             isDrawPrimPath = false;
             repaint();
             return;
@@ -783,27 +848,33 @@ public class GPaper extends JPanel {
             } else {
                 isVisited[currentVertex] = true;
                 for (int toVertex = 0; toVertex < numberOfVertices; toVertex++) {
-                    if (!isVisited[toVertex]
+                    if ((!isVisited[toVertex] || toVertex == endVertex)
                             && graph[currentVertex][toVertex] > 0
-                            && distance[currentVertex] + graph[currentVertex][toVertex] < distance[toVertex]) {
+                            && distance[currentVertex] + graph[currentVertex][toVertex] <= distance[toVertex]) {
+
+                        if (distance[currentVertex] + graph[currentVertex][toVertex] < distance[toVertex]) {
+                            dijkstra_theVertexBefore[toVertex].clear();
+
+                        }
                         distance[toVertex] = distance[currentVertex] + graph[currentVertex][toVertex];
-                        theVertexBefore[toVertex] = currentVertex;
+                        dijkstra_theVertexBefore[toVertex].add(currentVertex);
+
                     }
                 }
             }
         }
         if (isGraphConnected) {
-            currentVertex = endVertex;
+            dijkstraPath.clear();
             String path = "" + endVertex;
-            while (currentVertex != startVertex) {
-                currentVertex = theVertexBefore[currentVertex];
-                path = currentVertex + "->" + path;
-            }
-            dijkstraPath = "The length of the shortest path from " + startVertex + " to " + endVertex + " is "
-                    + distance[endVertex] + ": " + path;
+            currentVertex = endVertex;
+            Dijkstra_displayPath(path, currentVertex, startVertex, endVertex);
+
+            DijkstraMessage = "The length of the shortest path from " + startVertex + " to " + endVertex + " is "
+                    + distance[endVertex] + ": ";
         } else {
-            dijkstraPath = "Can't find path from " + startVertex + " to " + endVertex + "!";
+            DijkstraMessage = "Can't find path from " + startVertex + " to " + endVertex + "!";
         }
+
         isDrawPrimPath = false;
         repaint();
 
@@ -818,6 +889,5 @@ public class GPaper extends JPanel {
             theVertexBefore[i] = i;
             isVisited[i] = false;
         }
-        dijkstraPath = "";
     }
 }
